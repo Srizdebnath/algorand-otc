@@ -1,16 +1,25 @@
-import React, { useState, useEffect } from "react";
-import { peraWallet } from "../perawallet"; // Import our instance
+import React, { useState, useEffect, useCallback } from "react"; // Import useCallback
+import { peraWallet } from "../perawallet";
 
-function Header() {
-  const [accountAddress, setAccountAddress] = useState<string | null>(null);
+interface HeaderProps {
+  accountAddress: string | null;
+  setAccountAddress: (address: string | null) => void;
+}
+
+function Header({ accountAddress, setAccountAddress }: HeaderProps) {
   const isConnected = !!accountAddress;
 
+  // Wrap the disconnect handler in useCallback for stability
+  const handleDisconnectWalletClick = useCallback(() => {
+    peraWallet.disconnect();
+    setAccountAddress(null);
+  }, [setAccountAddress]);
+
   useEffect(() => {
-    // Reconnect to the session when the component mounts
     peraWallet
       .reconnectSession()
       .then((accounts) => {
-        // Setup disconnect event listener
+        // Use the stable disconnect handler here
         peraWallet.connector?.on("disconnect", handleDisconnectWalletClick);
 
         if (accounts.length) {
@@ -19,31 +28,26 @@ function Header() {
       })
       .catch((e) => console.log(e));
 
-    // Cleanup the event listener when the component unmounts
+    // CORRECTED CLEANUP FUNCTION
     return () => {
-      peraWallet.connector?.removeAllListeners();
+      // Use .off() with the same arguments to remove the listener
+      peraWallet.connector?.off("disconnect", handleDisconnectWalletClick);
     };
-  }, []);
+  }, [setAccountAddress, handleDisconnectWalletClick]); // Add the stable handler to dependencies
 
   const handleConnectWalletClick = () => {
     peraWallet
       .connect()
       .then((newAccounts) => {
-        // Setup the disconnect event listener
+        // Use the stable disconnect handler here as well
         peraWallet.connector?.on("disconnect", handleDisconnectWalletClick);
         setAccountAddress(newAccounts[0]);
       })
       .catch((error) => {
-        // Handle the case where the user closes the connection modal
         if (error?.data?.type !== "CONNECT_MODAL_CLOSED") {
           console.log(error);
         }
       });
-  };
-
-  const handleDisconnectWalletClick = () => {
-    peraWallet.disconnect();
-    setAccountAddress(null);
   };
 
   return (
@@ -53,7 +57,6 @@ function Header() {
         {isConnected ? (
           <div className="flex items-center">
             <span className="mr-4 font-mono bg-gray-700 p-2 rounded">
-              {/* Display truncated address */}
               {`${accountAddress.substring(0, 5)}...${accountAddress.substring(
                 accountAddress.length - 5
               )}`}

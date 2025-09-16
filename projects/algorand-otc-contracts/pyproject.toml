@@ -8,7 +8,6 @@ package-mode = false
 
 [tool.poetry.dependencies]
 python = ">=3.12,<4.0"
-algokit-utils = "^2.2.1"
 beaker-pyteal = "^1.1.1"
 python-dotenv = "^1.0.0"
 algorand-python = "^2.0.0"
@@ -16,6 +15,7 @@ algorand-python-testing = "~0"
 
 [tool.poetry.group.dev.dependencies]
 puyapy = "*"
+algokit-utils = "2.2.2"
 
 [build-system]
 requires = ["poetry-core"]
