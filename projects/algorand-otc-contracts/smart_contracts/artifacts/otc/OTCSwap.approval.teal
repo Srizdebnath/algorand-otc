@@ -1,0 +1,439 @@
+#pragma version 10
+#pragma typetrack false
+
+// algopy.arc4.ARC4Contract.approval_program() -> uint64:
+main:
+    intcblock 0 1 4 1000
+    bytecblock "is_completed" "maker" "asset_a" "asset_a_amount" "offer_expiry" "taker" "asset_b" "asset_b_amount"
+    // smart_contracts/otc/contract.py:5
+    // class OTCSwap(ARC4Contract):
+    txn NumAppArgs
+    bz main_after_if_else@10
+    pushbytess 0x6dea0794 0x772e5bcc 0x4f17d238 0x33b3499e // method "create_application(asset,uint64,asset,uint64,uint64,account)void", method "accept_offer(axfer)void", method "reclaim_assets()void", method "delete_application()void"
+    txna ApplicationArgs 0
+    match main_create_application_route@3 main_accept_offer_route@4 main_reclaim_assets_route@5 main_delete_application_route@6
+
+main_after_if_else@10:
+    // smart_contracts/otc/contract.py:5
+    // class OTCSwap(ARC4Contract):
+    intc_0 // 0
+    return
+
+main_delete_application_route@6:
+    // smart_contracts/otc/contract.py:85-86
+    // # Delete app (maker only, after completion)
+    // @abimethod(allow_actions=["DeleteApplication"])
+    txn OnCompletion
+    pushint 5 // DeleteApplication
+    ==
+    assert // OnCompletion is not DeleteApplication
+    txn ApplicationID
+    assert // can only call when not creating
+    callsub delete_application
+    intc_1 // 1
+    return
+
+main_reclaim_assets_route@5:
+    // smart_contracts/otc/contract.py:68-69
+    // # Reclaim Asset A if offer expires (maker only)
+    // @abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    callsub reclaim_assets
+    intc_1 // 1
+    return
+
+main_accept_offer_route@4:
+    // smart_contracts/otc/contract.py:36-37
+    // # Accept offer (taker deposits Asset B, swap executes)
+    // @abimethod()
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    assert // can only call when not creating
+    // smart_contracts/otc/contract.py:5
+    // class OTCSwap(ARC4Contract):
+    txn GroupIndex
+    intc_1 // 1
+    -
+    dup
+    gtxns TypeEnum
+    intc_2 // axfer
+    ==
+    assert // transaction type is axfer
+    // smart_contracts/otc/contract.py:36-37
+    // # Accept offer (taker deposits Asset B, swap executes)
+    // @abimethod()
+    callsub accept_offer
+    intc_1 // 1
+    return
+
+main_create_application_route@3:
+    // smart_contracts/otc/contract.py:16-17
+    // # Create application
+    // @abimethod(allow_actions=["NoOp"], create="require")
+    txn OnCompletion
+    !
+    assert // OnCompletion is not NoOp
+    txn ApplicationID
+    !
+    assert // can only call when creating
+    // smart_contracts/otc/contract.py:5
+    // class OTCSwap(ARC4Contract):
+    txna ApplicationArgs 1
+    btoi
+    txnas Assets
+    txna ApplicationArgs 2
+    btoi
+    txna ApplicationArgs 3
+    btoi
+    txnas Assets
+    txna ApplicationArgs 4
+    btoi
+    txna ApplicationArgs 5
+    btoi
+    txna ApplicationArgs 6
+    btoi
+    txnas Accounts
+    // smart_contracts/otc/contract.py:16-17
+    // # Create application
+    // @abimethod(allow_actions=["NoOp"], create="require")
+    callsub create_application
+    intc_1 // 1
+    return
+
+
+// smart_contracts.otc.contract.OTCSwap.create_application(asset_a: uint64, asset_a_amount: uint64, asset_b: uint64, asset_b_amount: uint64, expiry_rounds: uint64, taker: bytes) -> void:
+create_application:
+    // smart_contracts/otc/contract.py:16-26
+    // # Create application
+    // @abimethod(allow_actions=["NoOp"], create="require")
+    // def create_application(
+    //     self,
+    //     asset_a: Asset,
+    //     asset_a_amount: UInt64,
+    //     asset_b: Asset,
+    //     asset_b_amount: UInt64,
+    //     expiry_rounds: UInt64,
+    //     taker: Account,
+    // ) -> None:
+    proto 6 0
+    // smart_contracts/otc/contract.py:27
+    // self.maker = Txn.sender
+    bytec_1 // "maker"
+    txn Sender
+    app_global_put
+    // smart_contracts/otc/contract.py:28
+    // self.asset_a = asset_a
+    bytec_2 // "asset_a"
+    frame_dig -6
+    app_global_put
+    // smart_contracts/otc/contract.py:29
+    // self.asset_a_amount = asset_a_amount
+    bytec_3 // "asset_a_amount"
+    frame_dig -5
+    app_global_put
+    // smart_contracts/otc/contract.py:30
+    // self.asset_b = asset_b
+    bytec 6 // "asset_b"
+    frame_dig -4
+    app_global_put
+    // smart_contracts/otc/contract.py:31
+    // self.asset_b_amount = asset_b_amount
+    bytec 7 // "asset_b_amount"
+    frame_dig -3
+    app_global_put
+    // smart_contracts/otc/contract.py:32
+    // self.offer_expiry = Global.round + expiry_rounds
+    global Round
+    frame_dig -2
+    +
+    bytec 4 // "offer_expiry"
+    swap
+    app_global_put
+    // smart_contracts/otc/contract.py:33
+    // self.taker = taker
+    bytec 5 // "taker"
+    frame_dig -1
+    app_global_put
+    // smart_contracts/otc/contract.py:34
+    // self.is_completed = False
+    bytec_0 // "is_completed"
+    intc_0 // 0
+    app_global_put
+    retsub
+
+
+// smart_contracts.otc.contract.OTCSwap.accept_offer(taker_transfer: uint64) -> void:
+accept_offer:
+    // smart_contracts/otc/contract.py:36-38
+    // # Accept offer (taker deposits Asset B, swap executes)
+    // @abimethod()
+    // def accept_offer(self, taker_transfer: gtxn.AssetTransferTransaction) -> None:
+    proto 1 0
+    // smart_contracts/otc/contract.py:39
+    // assert not self.is_completed, "Swap already completed"
+    intc_0 // 0
+    bytec_0 // "is_completed"
+    app_global_get_ex
+    assert // check self.is_completed exists
+    !
+    assert // Swap already completed
+    // smart_contracts/otc/contract.py:40
+    // assert Global.round < self.offer_expiry, "Offer expired"
+    global Round
+    intc_0 // 0
+    bytec 4 // "offer_expiry"
+    app_global_get_ex
+    assert // check self.offer_expiry exists
+    <
+    assert // Offer expired
+    // smart_contracts/otc/contract.py:41
+    // if self.taker != Global.zero_address:
+    intc_0 // 0
+    bytec 5 // "taker"
+    app_global_get_ex
+    assert // check self.taker exists
+    global ZeroAddress
+    !=
+    bz accept_offer_after_if_else@2
+    // smart_contracts/otc/contract.py:42
+    // assert Txn.sender == self.taker, "Only assigned taker can accept"
+    txn Sender
+    intc_0 // 0
+    bytec 5 // "taker"
+    app_global_get_ex
+    assert // check self.taker exists
+    ==
+    assert // Only assigned taker can accept
+
+accept_offer_after_if_else@2:
+    // smart_contracts/otc/contract.py:43
+    // assert Txn.sender != self.maker, "Maker cannot accept own offer"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "maker"
+    app_global_get_ex
+    assert // check self.maker exists
+    swap
+    dig 1
+    !=
+    assert // Maker cannot accept own offer
+    // smart_contracts/otc/contract.py:45-46
+    // # Check taker transfer
+    // assert taker_transfer.asset_receiver == Global.current_application_address, "Must send to app"
+    frame_dig -1
+    gtxns AssetReceiver
+    global CurrentApplicationAddress
+    ==
+    assert // Must send to app
+    // smart_contracts/otc/contract.py:47
+    // assert taker_transfer.xfer_asset == self.asset_b, "Wrong asset sent"
+    frame_dig -1
+    gtxns XferAsset
+    intc_0 // 0
+    bytec 6 // "asset_b"
+    app_global_get_ex
+    assert // check self.asset_b exists
+    swap
+    dig 1
+    ==
+    assert // Wrong asset sent
+    // smart_contracts/otc/contract.py:48
+    // assert taker_transfer.asset_amount == self.asset_b_amount, "Wrong amount sent"
+    frame_dig -1
+    gtxns AssetAmount
+    intc_0 // 0
+    bytec 7 // "asset_b_amount"
+    app_global_get_ex
+    assert // check self.asset_b_amount exists
+    swap
+    dig 1
+    ==
+    assert // Wrong amount sent
+    // smart_contracts/otc/contract.py:50-56
+    // # Send Asset A to taker
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_a,
+    //     asset_receiver=Txn.sender,
+    //     asset_amount=self.asset_a_amount,
+    //     fee=1_000,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/otc/contract.py:52
+    // xfer_asset=self.asset_a,
+    intc_0 // 0
+    bytec_2 // "asset_a"
+    app_global_get_ex
+    assert // check self.asset_a exists
+    // smart_contracts/otc/contract.py:53
+    // asset_receiver=Txn.sender,
+    txn Sender
+    // smart_contracts/otc/contract.py:54
+    // asset_amount=self.asset_a_amount,
+    intc_0 // 0
+    bytec_3 // "asset_a_amount"
+    app_global_get_ex
+    assert // check self.asset_a_amount exists
+    itxn_field AssetAmount
+    itxn_field AssetReceiver
+    itxn_field XferAsset
+    // smart_contracts/otc/contract.py:50-51
+    // # Send Asset A to taker
+    // itxn.AssetTransfer(
+    intc_2 // axfer
+    itxn_field TypeEnum
+    // smart_contracts/otc/contract.py:55
+    // fee=1_000,
+    intc_3 // 1000
+    itxn_field Fee
+    // smart_contracts/otc/contract.py:50-56
+    // # Send Asset A to taker
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_a,
+    //     asset_receiver=Txn.sender,
+    //     asset_amount=self.asset_a_amount,
+    //     fee=1_000,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/otc/contract.py:58-64
+    // # Send Asset B to maker
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_b,
+    //     asset_receiver=self.maker,
+    //     asset_amount=self.asset_b_amount,
+    //     fee=1_000,
+    // ).submit()
+    itxn_begin
+    itxn_field AssetAmount
+    itxn_field XferAsset
+    itxn_field AssetReceiver
+    // smart_contracts/otc/contract.py:58-59
+    // # Send Asset B to maker
+    // itxn.AssetTransfer(
+    intc_2 // axfer
+    itxn_field TypeEnum
+    // smart_contracts/otc/contract.py:63
+    // fee=1_000,
+    intc_3 // 1000
+    itxn_field Fee
+    // smart_contracts/otc/contract.py:58-64
+    // # Send Asset B to maker
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_b,
+    //     asset_receiver=self.maker,
+    //     asset_amount=self.asset_b_amount,
+    //     fee=1_000,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/otc/contract.py:66
+    // self.is_completed = True
+    bytec_0 // "is_completed"
+    intc_1 // 1
+    app_global_put
+    retsub
+
+
+// smart_contracts.otc.contract.OTCSwap.reclaim_assets() -> void:
+reclaim_assets:
+    // smart_contracts/otc/contract.py:71
+    // assert not self.is_completed, "Swap already completed"
+    intc_0 // 0
+    bytec_0 // "is_completed"
+    app_global_get_ex
+    assert // check self.is_completed exists
+    !
+    assert // Swap already completed
+    // smart_contracts/otc/contract.py:72
+    // assert Global.round >= self.offer_expiry, "Offer not expired"
+    global Round
+    intc_0 // 0
+    bytec 4 // "offer_expiry"
+    app_global_get_ex
+    assert // check self.offer_expiry exists
+    >=
+    assert // Offer not expired
+    // smart_contracts/otc/contract.py:73
+    // assert Txn.sender == self.maker, "Only maker can reclaim"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "maker"
+    app_global_get_ex
+    assert // check self.maker exists
+    swap
+    dig 1
+    ==
+    assert // Only maker can reclaim
+    // smart_contracts/otc/contract.py:75-81
+    // # Refund Asset A to maker
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_a,
+    //     asset_receiver=self.maker,
+    //     asset_amount=self.asset_a_amount,
+    //     fee=1_000,
+    // ).submit()
+    itxn_begin
+    // smart_contracts/otc/contract.py:77
+    // xfer_asset=self.asset_a,
+    intc_0 // 0
+    bytec_2 // "asset_a"
+    app_global_get_ex
+    assert // check self.asset_a exists
+    // smart_contracts/otc/contract.py:79
+    // asset_amount=self.asset_a_amount,
+    intc_0 // 0
+    bytec_3 // "asset_a_amount"
+    app_global_get_ex
+    assert // check self.asset_a_amount exists
+    itxn_field AssetAmount
+    itxn_field XferAsset
+    itxn_field AssetReceiver
+    // smart_contracts/otc/contract.py:75-76
+    // # Refund Asset A to maker
+    // itxn.AssetTransfer(
+    intc_2 // axfer
+    itxn_field TypeEnum
+    // smart_contracts/otc/contract.py:80
+    // fee=1_000,
+    intc_3 // 1000
+    itxn_field Fee
+    // smart_contracts/otc/contract.py:75-81
+    // # Refund Asset A to maker
+    // itxn.AssetTransfer(
+    //     xfer_asset=self.asset_a,
+    //     asset_receiver=self.maker,
+    //     asset_amount=self.asset_a_amount,
+    //     fee=1_000,
+    // ).submit()
+    itxn_submit
+    // smart_contracts/otc/contract.py:83
+    // self.is_completed = True
+    bytec_0 // "is_completed"
+    intc_1 // 1
+    app_global_put
+    retsub
+
+
+// smart_contracts.otc.contract.OTCSwap.delete_application() -> void:
+delete_application:
+    // smart_contracts/otc/contract.py:88
+    // assert self.is_completed, "Swap must be completed or expired"
+    intc_0 // 0
+    bytec_0 // "is_completed"
+    app_global_get_ex
+    assert // check self.is_completed exists
+    assert // Swap must be completed or expired
+    // smart_contracts/otc/contract.py:89
+    // assert Txn.sender == self.maker, "Only maker can delete"
+    txn Sender
+    intc_0 // 0
+    bytec_1 // "maker"
+    app_global_get_ex
+    assert // check self.maker exists
+    ==
+    assert // Only maker can delete
+    retsub
