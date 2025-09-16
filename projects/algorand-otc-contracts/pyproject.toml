@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "algorand-otc-contracts"
+version = "0.1.0"
+description = "Algorand smart contracts"
+authors = ["Srizdebnath <srizd449@gmail.com>"]
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = ">=3.12,<4.0"
+algokit-utils = "^2.2.1"
+beaker-pyteal = "^1.1.1"
+python-dotenv = "^1.0.0"
+algorand-python = "^2.0.0"
+algorand-python-testing = "~0"
+
+[tool.poetry.group.dev.dependencies]
+puyapy = "*"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
