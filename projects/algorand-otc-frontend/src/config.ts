@@ -1,0 +1,1 @@
+export const OTCDapp_APP_ID = 565415631;
