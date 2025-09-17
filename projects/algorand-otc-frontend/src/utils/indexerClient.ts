@@ -1,6 +1,9 @@
+// src/utils/indexerClient.ts
+
 import algosdk from 'algosdk';
 
-const indexerToken = ''; // No token needed for public AlgoNode
+// Configuration for the public TestNet Indexer
+const indexerToken = '';
 const indexerServer = 'https://testnet-idx.algonode.cloud';
 const indexerPort = 443;
 

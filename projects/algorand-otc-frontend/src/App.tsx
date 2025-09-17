@@ -1,16 +1,17 @@
+// src/App.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { peraWallet } from './perawallet';
 import Header from './components/Header';
 import CreateOffer from './components/CreateOffer';
 import BrowseOffers from './components/BrowseOffers';
-import LandingPage from './components/LandingPage'; // Import our new landing page
-import Sidebar from './components/Sidebar'; 
+import LandingPage from './components/LandingPage';
+import Sidebar from './components/Sidebar';
 
 function App() {
   const [accountAddress, setAccountAddress] = useState<string | null>(null);
   const isConnected = !!accountAddress;
 
-  // --- Wallet Logic now lives in the main App component ---
   const handleDisconnectWalletClick = useCallback(() => {
     peraWallet.disconnect();
     setAccountAddress(null);
@@ -40,20 +41,18 @@ function App() {
       .catch((e) => console.log(e));
     
     return () => {
-      peraWallet.connector?.off("disconnect", handleDisconnectWalletClick);
+      peraWallet.connector?.off("disconnect");
     };
   }, [handleDisconnectWalletClick]);
-  // --- End of Wallet Logic ---
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
       <Header accountAddress={accountAddress} onDisconnect={handleDisconnectWalletClick} />
-      
       <div className={isConnected ? "app-grid" : ""}>
         {isConnected ? (
           <>
             <Sidebar />
-            <main className="p-8">
+            <main className="p-8 overflow-y-auto">
               <div className="flex flex-wrap justify-center gap-8">
                 <CreateOffer accountAddress={accountAddress} />
                 <BrowseOffers accountAddress={accountAddress} />
