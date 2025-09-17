@@ -46,9 +46,9 @@ interface Offer {
       appId: 1004,
       maker: "HEADLINE",
       sellAssetId: 137594422, // HDL
-      sellAmount: 2500,
+      sellAmount: 0.1,
       buyAssetId: 0, // ALGO
-      buyAmount: 3000,
+      buyAmount: 0.2,
       pricePerUnit: 1.2,
       expiryText: "1h left",
     },

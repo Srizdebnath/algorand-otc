@@ -1,10 +1,9 @@
-import React, { Fragment } from 'react'; // Import Fragment
-import { Menu, Transition } from '@headlessui/react'; // Import Menu components
+import React, { Fragment } from 'react';
+import { Menu, Transition } from '@headlessui/react';
 import { ChevronDownIcon, ArrowLeftOnRectangleIcon } from '@heroicons/react/20/solid';
 
 interface HeaderProps {
   accountAddress: string | null;
-  // We need to pass the disconnect function back in
   onDisconnect: () => void;
 }
 
@@ -15,26 +14,22 @@ const AlgorandLogo = () => (
     </svg>
 );
 
-
 function Header({ accountAddress, onDisconnect }: HeaderProps) {
   const isConnected = !!accountAddress;
 
   return (
     <header className="p-4 bg-gray-800 text-white flex justify-between items-center border-b border-gray-700 shadow-md">
-      {/* Left Side: Branding and Navigation (remains the same) */}
+      {/* Left Side: Branding and Navigation */}
       <div className="flex items-center gap-x-8">
+        {/* Branding (Logo and Title) */}
         <div className="flex items-center gap-x-3 text-cyan-400">
           <AlgorandLogo />
           <h1 className="text-2xl font-bold text-white">OTC Swap</h1>
         </div>
-        <nav className="hidden md:flex items-center gap-x-6 text-gray-400">
-          <a href="#" className="text-white font-semibold hover:text-cyan-400 transition-colors">Dashboard</a>
-          <a href="#" className="hover:text-cyan-400 transition-colors">My Offers</a>
-          <a href="#" className="hover:text-cyan-400 transition-colors">History</a>
-        </nav>
+
       </div>
 
-      {/* Right Side: User Dropdown Menu */}
+      {/* Right Side: User Dropdown Menu (already conditional) */}
       <div>
         {isConnected && (
           <Menu as="div" className="relative inline-block text-left">
@@ -42,7 +37,9 @@ function Header({ accountAddress, onDisconnect }: HeaderProps) {
               <Menu.Button className="flex items-center gap-x-3 bg-gray-900 px-4 py-2 rounded-lg border border-gray-700 hover:bg-gray-700 transition-colors">
                 <div className="w-3 h-3 bg-green-500 rounded-full" title="Connected"></div>
                 <span className="font-mono text-sm text-gray-300">
-                  {`${accountAddress.substring(0, 5)}...${accountAddress.substring(accountAddress.length - 5)}`}
+                  {`${accountAddress.substring(0, 5)}...${accountAddress.substring(
+                    accountAddress.length - 5
+                  )}`}
                 </span>
                 <ChevronDownIcon className="h-5 w-5 text-gray-400" />
               </Menu.Button>

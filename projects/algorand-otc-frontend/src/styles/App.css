@@ -2,6 +2,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+.app-grid {
+  display: grid;
+  grid-template-columns: 240px 1fr; /* 240px for the sidebar, the rest for main content */
+  height: calc(100vh - 73px); /* Full height minus the header height */
+}
 .hero {
   display: flex;
   justify-content: center;

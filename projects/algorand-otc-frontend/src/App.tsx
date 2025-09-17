@@ -4,6 +4,7 @@ import Header from './components/Header';
 import CreateOffer from './components/CreateOffer';
 import BrowseOffers from './components/BrowseOffers';
 import LandingPage from './components/LandingPage'; // Import our new landing page
+import Sidebar from './components/Sidebar'; 
 
 function App() {
   const [accountAddress, setAccountAddress] = useState<string | null>(null);
@@ -46,23 +47,25 @@ function App() {
 
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      {/* CORRECTED: Pass the disconnect function to the header */}
-      <Header
-        accountAddress={accountAddress}
-        onDisconnect={handleDisconnectWalletClick}
-      />
+      <Header accountAddress={accountAddress} onDisconnect={handleDisconnectWalletClick} />
       
-      <main className="p-8 mt-10">
-        
+      <div className={isConnected ? "app-grid" : ""}>
         {isConnected ? (
-          <div className="flex flex-wrap justify-center">
-            <CreateOffer accountAddress={accountAddress} />
-            <BrowseOffers accountAddress={accountAddress} />
-          </div>
+          <>
+            <Sidebar />
+            <main className="p-8">
+              <div className="flex flex-wrap justify-center gap-8">
+                <CreateOffer accountAddress={accountAddress} />
+                <BrowseOffers accountAddress={accountAddress} />
+              </div>
+            </main>
+          </>
         ) : (
-          <LandingPage onConnect={handleConnectWalletClick} />
+          <main className="p-8 mt-10">
+            <LandingPage onConnect={handleConnectWalletClick} />
+          </main>
         )}
-      </main>
+      </div>
     </div>
   );
 }
