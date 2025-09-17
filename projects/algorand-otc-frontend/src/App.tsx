@@ -1,31 +1,66 @@
-import { useState } from "react";
-import Header from "./components/Header";
-import CreateOffer from "./components/CreateOffer";
-import BrowseOffers from "./components/BrowseOffers";
+import React, { useState, useEffect, useCallback } from 'react';
+import { peraWallet } from './perawallet';
+import Header from './components/Header';
+import CreateOffer from './components/CreateOffer';
+import BrowseOffers from './components/BrowseOffers';
+import LandingPage from './components/LandingPage'; // Import our new landing page
 
 function App() {
   const [accountAddress, setAccountAddress] = useState<string | null>(null);
   const isConnected = !!accountAddress;
 
+  // --- Wallet Logic now lives in the main App component ---
+  const handleDisconnectWalletClick = useCallback(() => {
+    peraWallet.disconnect();
+    setAccountAddress(null);
+  }, []);
+
+  const handleConnectWalletClick = useCallback(() => {
+    peraWallet.connect()
+      .then((newAccounts) => {
+        peraWallet.connector?.on("disconnect", handleDisconnectWalletClick);
+        setAccountAddress(newAccounts[0]);
+      })
+      .catch((error) => {
+        if (error?.data?.type !== "CONNECT_MODAL_CLOSED") {
+          console.log(error);
+        }
+      });
+  }, [handleDisconnectWalletClick]);
+
+  useEffect(() => {
+    peraWallet.reconnectSession()
+      .then((accounts) => {
+        peraWallet.connector?.on("disconnect", handleDisconnectWalletClick);
+        if (accounts.length) {
+          setAccountAddress(accounts[0]);
+        }
+      })
+      .catch((e) => console.log(e));
+    
+    return () => {
+      peraWallet.connector?.off("disconnect", handleDisconnectWalletClick);
+    };
+  }, [handleDisconnectWalletClick]);
+  // --- End of Wallet Logic ---
+
   return (
     <div className="bg-gray-900 min-h-screen text-white">
-      <Header accountAddress={accountAddress} setAccountAddress={setAccountAddress} />
+      {/* CORRECTED: Pass the disconnect function to the header */}
+      <Header
+        accountAddress={accountAddress}
+        onDisconnect={handleDisconnectWalletClick}
+      />
       
-      <main className="p-8">
+      <main className="p-8 mt-10">
+        
         {isConnected ? (
           <div className="flex flex-wrap justify-center">
             <CreateOffer accountAddress={accountAddress} />
-            {/* MODIFIED LINE: Pass the user's address to BrowseOffers */}
             <BrowseOffers accountAddress={accountAddress} />
           </div>
         ) : (
-          // ... rest of the file is the same
-          <div className="text-center">
-            <h2 className="text-2xl font-bold">
-              Welcome to the Algorand OTC Platform
-            </h2>
-            <p className="text-gray-400 mt-2">Connect your wallet to create and accept offers.</p>
-          </div>
+          <LandingPage onConnect={handleConnectWalletClick} />
         )}
       </main>
     </div>

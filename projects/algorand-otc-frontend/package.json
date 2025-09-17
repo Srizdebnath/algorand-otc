@@ -27,6 +27,8 @@
   "dependencies": {
     "@algorandfoundation/algokit-utils": "^9.0.0",
     "@blockshake/defly-connect": "^1.2.1",
+    "@headlessui/react": "^2.2.8",
+    "@heroicons/react": "^2.2.0",
     "@perawallet/connect": "^1.4.2",
     "@txnlab/use-wallet": "^4.0.0",
     "@txnlab/use-wallet-react": "^4.0.0",
