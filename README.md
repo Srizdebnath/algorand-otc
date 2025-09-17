@@ -1,11 +1,17 @@
 # Algorand-Native Decentralized OTC Trading Platform
 
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 ![Framework](https://img.shields.io/badge/Framework-AlgoKit-blue.svg)
 ![Language](https://img.shields.io/badge/Language-Python-green.svg)
 ![Frontend](https://img.shields.io/badge/Frontend-React-cyan.svg)
 
 A trustless, on-chain Over-the-Counter (OTC) trading platform for **Algorand Standard Assets (ASAs)**, secured entirely by an Algorand smart contract.
+
+---
+
+## 🌐 Live Demo
+
+Try it now: [https://algorand-otc.vercel.app/](https://algorand-otc.vercel.app/)
 
 ---
 
@@ -91,52 +97,44 @@ Ensure you have installed:
    ```bash
    git clone https://github.com/Srizdebnath/algorand-otc.git
    cd algorand-otc
+   ```
+
 2. **Set up the smart contract environment**
    ```bash
    cd projects/algorand-otc-contracts
    poetry install
-
+   ```
 
 3. **Set up the frontend dApp**
- ```bash
+   ```bash
+   cd ../algorand-otc-frontend
+   npm install
+   cd ../..
+   ```
 
-cd ../algorand-otc-frontend
-npm install
-cd ../..
-
-
+---
 
 ### ▶️ Running the Project
-  ```bash
 
-   Start LocalNet
+1. **Start LocalNet**
+   ```bash
    algokit localnet start
+   ```
 
+2. **Build & Deploy the Smart Contract**
+   ```bash
+   algokit run build
+   algokit run deploy:localnet
+   ```
 
-**1. Build & Deploy the Smart Contract**
+3. **Run the Frontend dApp**
+   ```bash
+   cd projects/algorand-otc-frontend
+   npm run dev
+   ```
 
-algokit run build
-algokit run deploy:localnet
+Open your browser at 👉 [http://localhost:5173](http://localhost:5173)
 
-
-**2. Run the Frontend dApp**
-```bash
-cd projects/algorand-otc-frontend
-npm run dev
-
-
-Open your browser at 👉 http://localhost:5173
+---
 
 ### 📂 Project Structure
-algorand-otc/
-├── .algokit.toml                # AlgoKit project configuration
-├── projects/
-│   ├── algorand-otc-contracts/
-│   │   ├── smart_contracts/
-│   │   │   └── otc/
-│   │   │       └── contract.py  # Main smart contract
-│   │   └── pyproject.toml       # Python dependencies (Poetry)
-│   └── algorand-otc-frontend/
-│       ├── src/                 # React dApp source
-│       └── package.json         # Node.js dependencies
-└── README.md
