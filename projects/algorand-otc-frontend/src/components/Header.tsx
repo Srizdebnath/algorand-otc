@@ -52,7 +52,7 @@ function Header({ accountAddress, setAccountAddress }: HeaderProps) {
 
   return (
     <header className="p-4 bg-gray-800 text-white flex justify-between items-center">
-      <h1 className="text-2xl font-bold">OTC Swap dApp</h1>
+      <h1 className="text-2xl font-bold">QuickSwap</h1>
       <div>
         {isConnected ? (
           <div className="flex items-center">
