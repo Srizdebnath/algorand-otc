@@ -1,45 +1,142 @@
-# algorand-otc
+# Algorand-Native Decentralized OTC Trading Platform
 
-This starter full stack project has been generated using AlgoKit. See below for default getting started instructions.
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Framework](https://img.shields.io/badge/Framework-AlgoKit-blue.svg)
+![Language](https://img.shields.io/badge/Language-Python-green.svg)
+![Frontend](https://img.shields.io/badge/Frontend-React-cyan.svg)
 
-## Setup
+A trustless, on-chain Over-the-Counter (OTC) trading platform for **Algorand Standard Assets (ASAs)**, secured entirely by an Algorand smart contract.
 
-### Initial setup
-1. Clone this repository to your local machine.
-2. Ensure [Docker](https://www.docker.com/) is installed and operational. Then, install `AlgoKit` following this [guide](https://github.com/algorandfoundation/algokit-cli#install).
-3. Run `algokit project bootstrap all` in the project directory. This command sets up your environment by installing necessary dependencies, setting up a Python virtual environment, and preparing your `.env` file.
-4. In the case of a smart contract project, execute `algokit generate env-file -a target_network localnet` from the `algorand-otc-contracts` directory to create a `.env.localnet` file with default configuration for `localnet`.
-5. To build your project, execute `algokit project run build`. This compiles your project and prepares it for running.
-6. For project-specific instructions, refer to the READMEs of the child projects:
-   - Smart Contracts: [algorand-otc-contracts](projects/algorand-otc-contracts/README.md)
-   - Frontend Application: [algorand-otc-frontend](projects/algorand-otc-frontend/README.md)
+---
 
-> This project is structured as a monorepo, refer to the [documentation](https://github.com/algorandfoundation/algokit-cli/blob/main/docs/features/project/run.md) to learn more about custom command orchestration via `algokit project run`.
+## 📖 Overview
+This project provides a **fully decentralized solution** for two parties to securely swap specific amounts of ASAs **without counterparty risk**.  
 
-### Subsequently
+Unlike Decentralized Exchanges (DEXs), which are optimized for liquid, order-book-based trading, this platform is designed for **larger, less liquid, or highly specific trades** that are typically arranged off-chain.
 
-1. If you update to the latest source code and there are new dependencies, you will need to run `algokit project bootstrap all` again.
-2. Follow step 3 above.
+---
 
-## Tools
+## ❌ The Problem
+Currently, conducting large or specific ASA trades requires **off-chain communication** and a **high degree of trust** between parties, or complex, manual multi-signature escrow setups.  
 
-This project makes use of Python and React to build Algorand smart contracts and to provide a base project configuration to develop frontends for your Algorand dApps and interactions with smart contracts. The following tools are in use:
+This process is:
+- Inefficient ⚡
+- Prone to scams ⚠️
+- Introduces significant counterparty risk ❌  
 
-- Algorand, AlgoKit, and AlgoKit Utils
-- Python dependencies including Poetry, Black, Ruff or Flake8, mypy, pytest, and pip-audit
-- React and related dependencies including AlgoKit Utils, Tailwind CSS, daisyUI, use-wallet, npm, jest, playwright, Prettier, ESLint, and Github Actions workflows for build validation
+There is **no native, on-chain mechanism** to facilitate these trustless OTC deals.
 
-### VS Code
+---
 
-It has also been configured to have a productive dev experience out of the box in [VS Code](https://code.visualstudio.com/), see the [backend .vscode](./backend/.vscode) and [frontend .vscode](./frontend/.vscode) folders for more details.
+## ✅ The Solution
+An **Algorand Smart Contract** that acts as a trustless **escrow and atomic swap agent**.
 
-## Integrating with smart contracts and application clients
+- A **Maker** creates an on-chain offer by depositing their assets into the smart contract.  
+- A **Taker** accepts the offer by depositing their corresponding assets.  
+- The smart contract automatically and atomically **executes the swap**, ensuring **both sides happen or neither does**.  
 
-Refer to the [algorand-otc-contracts](projects/algorand-otc-contracts/README.md) folder for overview of working with smart contracts, [projects/algorand-otc-frontend](projects/algorand-otc-frontend/README.md) for overview of the React project and the [projects/algorand-otc-frontend/contracts](projects/algorand-otc-frontend/src/contracts/README.md) folder for README on adding new smart contracts from backend as application clients on your frontend. The templates provided in these folders will help you get started.
-When you compile and generate smart contract artifacts, your frontend component will automatically generate typescript application clients from smart contract artifacts and move them to `frontend/src/contracts` folder, see [`generate:app-clients` in package.json](projects/algorand-otc-frontend/package.json). Afterwards, you are free to import and use them in your frontend application.
+---
 
-The frontend starter also provides an example of interactions with your OtcClient in [`AppCalls.tsx`](projects/algorand-otc-frontend/src/components/AppCalls.tsx) component by default.
+## ✨ Key Features
+- **Offer Creation**: Public or private offers with ASA details, quantities, and expiration.  
+- **Trustless Escrow**: Maker’s assets are locked in the smart contract.  
+- **Atomic Swap Execution**: Instant asset swaps without counterparty risk.  
+- **Dispute Resolution & Refunds**: Expired offers can be reclaimed by the Maker.  
+- **Private Trades**: Offers restricted to a specific Algorand address.  
 
-## Next Steps
+---
 
-You can take this project and customize it to build your own decentralized applications on Algorand. Make sure to understand how to use AlgoKit and how to write smart contracts for Algorand before you start.
+## 🔄 Visual Workflow
+![Workflow Diagram](assets/workflow_diagram.png)  
+*(Place your diagram in an `assets/` folder in the project root)*
+
+---
+
+## 🛠️ Tech Stack
+
+### 🔗 Smart Contract (Backend)
+- **Language**: Python  
+- **Framework**: Beaker  
+- **TealScript**: PyTeal  
+
+### 💻 dApp (Frontend)
+- **Framework**: React (Vite)  
+- **Language**: TypeScript  
+- **Styling**: Tailwind CSS  
+- **Wallet Integration**: `use-wallet` (Pera Wallet & others)  
+
+### ⚙️ Development & Tooling
+- **Orchestration**: AlgoKit  
+- **Environment**: Docker  
+- **Python Dependencies**: Poetry  
+- **Node Dependencies**: NPM  
+
+---
+
+## 🚀 Getting Started
+
+### 📋 Prerequisites
+Ensure you have installed:
+- [AlgoKit](https://github.com/algorandfoundation/algokit) (v2.0.0 or higher)  
+- Docker  
+- Python (3.12 or higher)  
+- Node.js (v18 or higher)  
+- Poetry  
+
+---
+
+### 🔧 Installation & Setup
+
+1. **Clone the repository**  
+   ```bash
+   git clone https://github.com/Srizdebnath/algorand-otc.git
+   cd algorand-otc
+2. **Set up the smart contract environment**
+   ```bash
+   cd projects/algorand-otc-contracts
+   poetry install
+
+
+3. **Set up the frontend dApp**
+ ```bash
+
+cd ../algorand-otc-frontend
+npm install
+cd ../..
+
+
+
+### ▶️ Running the Project
+  ```bash
+
+   Start LocalNet
+   algokit localnet start
+
+
+**1. Build & Deploy the Smart Contract**
+
+algokit run build
+algokit run deploy:localnet
+
+
+**2. Run the Frontend dApp**
+```bash
+cd projects/algorand-otc-frontend
+npm run dev
+
+
+Open your browser at 👉 http://localhost:5173
+
+### 📂 Project Structure
+algorand-otc/
+├── .algokit.toml                # AlgoKit project configuration
+├── projects/
+│   ├── algorand-otc-contracts/
+│   │   ├── smart_contracts/
+│   │   │   └── otc/
+│   │   │       └── contract.py  # Main smart contract
+│   │   └── pyproject.toml       # Python dependencies (Poetry)
+│   └── algorand-otc-frontend/
+│       ├── src/                 # React dApp source
+│       └── package.json         # Node.js dependencies
+└── README.md
