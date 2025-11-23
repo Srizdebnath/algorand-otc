@@ -1,3 +1,4 @@
+
 from algopy import *
 from algopy.arc4 import abimethod
 
@@ -46,6 +47,7 @@ class OTCSwap(ARC4Contract):
         assert taker_transfer.asset_receiver == Global.current_application_address, "Must send to app"
         assert taker_transfer.xfer_asset == self.asset_b, "Wrong asset sent"
         assert taker_transfer.asset_amount == self.asset_b_amount, "Wrong amount sent"
+        assert taker_transfer.tx_id == gtxn[0].tx_id, "Taker transfer must be part of current transaction group"
 
         # Send Asset A to taker
         itxn.AssetTransfer(
@@ -71,6 +73,7 @@ class OTCSwap(ARC4Contract):
         assert not self.is_completed, "Swap already completed"
         assert Global.round >= self.offer_expiry, "Offer not expired"
         assert Txn.sender == self.maker, "Only maker can reclaim"
+        assert not self.is_deleted(), "Application has already been deleted"
 
         # Refund Asset A to maker
         itxn.AssetTransfer(
@@ -87,5 +90,7 @@ class OTCSwap(ARC4Contract):
     def delete_application(self) -> None:
         assert self.is_completed, "Swap must be completed or expired"
         assert Txn.sender == self.maker, "Only maker can delete"
+        assert not self.is_deleted(), "Application has already been deleted"
 
-
+    def is_deleted(self) -> bool:
+        return Global.application_id == 0
